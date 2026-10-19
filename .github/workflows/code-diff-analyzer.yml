@@ -4,8 +4,8 @@ on:
   workflow_call:
     secrets:
       BEDROCK_ACCESS_ROLE:
-        required: false  # LAB: Bedrock not available, see ANTHROPIC_API_KEY
-      ANTHROPIC_API_KEY:  # LAB: added
+        required: false  # LAB: Bedrock not available, see CLAUDE_CODE_OAUTH_TOKEN
+      CLAUDE_CODE_OAUTH_TOKEN:  # LAB: subscription OAuth token (from `claude setup-token`)
         required: true
     inputs:
       skip_diff_analyzer_on_push:  # Only update if event is push
@@ -46,8 +46,10 @@ jobs:
       id-token: write  # github oidc to assume aws roles
       pull-requests: write  # to create or update comment (peter-evans/create-or-update-comment)
     env:
-      # LAB: Bedrock (OIDC role) replaced with Anthropic API; same models, Anthropic API IDs
-      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      # LAB: Bedrock (OIDC role) replaced with Claude Code subscription OAuth token.
+      # The claude CLI uses CLAUDE_CODE_OAUTH_TOKEN; ANTHROPIC_API_KEY is deliberately
+      # NOT set here (if set it takes precedence over the OAuth token). Same models.
+      CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       ANTHROPIC_MODEL: 'claude-sonnet-4-6'
       ANTHROPIC_DEFAULT_SONNET_MODEL: 'claude-sonnet-4-6'
       ANTHROPIC_DEFAULT_HAIKU_MODEL: 'claude-haiku-4-5-20251001'
