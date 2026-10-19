@@ -60,7 +60,7 @@ jobs:
     permissions:
       id-token: write  # github oidc to assume aws roles
       pull-requests: write  # to create or update comment (peter-evans/create-or-update-comment)
-    secrets: inherit  # LAB: passes ANTHROPIC_API_KEY (and GITHUB_TOKEN) to the analyzer
+    secrets: inherit  # LAB: passes CLAUDE_CODE_OAUTH_TOKEN (and GITHUB_TOKEN) to the analyzer
     with:
       skip_diff_analyzer_with_label_name: 'skip-diff-analyzer'
       update_pr_comment_with_analyzer_report: true
@@ -93,8 +93,17 @@ jobs:
       # `./gradlew help` configures the root build.gradle (where a minimal-path payload
       # lives); escalate to `:buildSrc:compileJava` only if config-time exec is in doubt.
       - name: Run gradle check (stands in for Jenkins withSecrets)
+        # LAB: mirrors the real Jenkins withSecrets blocks. runGradleCheck.groovy
+        # injects the S3 creds as lowercase env vars amazon_s3_*; the Jenkinsfile
+        # injects DOCKER_USERNAME/DOCKER_PASSWORD. Same names here (values are
+        # obviously-fake lab canaries).
         env:
-          LAB_SECRET: ${{ secrets.LAB_SECRET }}
+          amazon_s3_access_key: ${{ secrets.amazon_s3_access_key }}
+          amazon_s3_secret_key: ${{ secrets.amazon_s3_secret_key }}
+          amazon_s3_bucket: ${{ secrets.amazon_s3_bucket }}
+          amazon_s3_base_path: ${{ secrets.amazon_s3_base_path }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
           LAB_NGROK_URL: ${{ secrets.LAB_NGROK_URL }}
         run: |
           echo "=== lab gradle-check: configuring the attacker PR head ==="
